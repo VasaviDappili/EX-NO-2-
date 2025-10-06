@@ -1,12 +1,9 @@
 ## EX. NO:2 IMPLEMENTATION OF PLAYFAIR CIPHER
 
- 
+## NAME : DAPPILI VASAVI
+## REGISTER NUMBER : 212223040030
 
 ## AIM:
- 
-
- 
-
 To write a C program to implement the Playfair Substitution technique.
 
 ## DESCRIPTION:
@@ -34,10 +31,144 @@ STEP-5: Display the obtained cipher text.
 
 
 
-Program:
+## Program:
+```
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define SIZE 5
+
+char matrix[SIZE][SIZE];
+
+void prepareKeyMatrix(char key[]) {
+    int used[26] = {0};
+    used['j' - 'a'] = 1; 
+    int idx = 0;
+
+    for (int i = 0; i < strlen(key); i++) {
+        char ch = tolower(key[i]);
+        if (ch < 'a' || ch > 'z') continue;
+        if (ch == 'j') ch = 'i';
+
+        if (!used[ch - 'a']) {
+            matrix[idx / SIZE][idx % SIZE] = ch;
+            used[ch - 'a'] = 1;
+            idx++;
+        }
+    }
+
+    for (char ch = 'a'; ch <= 'z'; ch++) {
+        if (!used[ch - 'a']) {
+            matrix[idx / SIZE][idx % SIZE] = ch;
+            used[ch - 'a'] = 1;
+            idx++;
+        }
+    }
+}
 
 
+void displayMatrix() {
+    printf("\nKey Matrix:\n");
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            printf("%c ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
 
 
+void findPosition(char ch, int *row, int *col) {
+    if (ch == 'j') ch = 'i';
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (matrix[i][j] == ch) {
+                *row = i;
+                *col = j;
+                return;
+            }
+        }
+    }
+}
 
-Output:
+
+void preparePlainText(char *input, char *output) {
+    int len = 0;
+    for (int i = 0; input[i]; i++) {
+        if (isalpha(input[i])) {
+            output[len++] = tolower(input[i]) == 'j' ? 'i' : tolower(input[i]);
+        }
+    }
+    output[len] = '\0';
+
+    char temp[100];
+    int k = 0;
+
+    for (int i = 0; i < len; i++) {
+        temp[k++] = output[i];
+        if (i + 1 < len) {
+            if (output[i] == output[i + 1]) {
+                temp[k++] = 'x';
+            } else {
+                temp[k++] = output[++i];
+            }
+        }
+    }
+    if (k % 2 != 0) {
+        temp[k++] = 'x'; 
+    }
+    temp[k] = '\0';
+    strcpy(output, temp);
+}
+
+void encrypt(char *plaintext, char *ciphertext) {
+    int i = 0, idx = 0;
+    while (plaintext[i] && plaintext[i + 1]) {
+        char a = plaintext[i];
+        char b = plaintext[i + 1];
+        int row1, col1, row2, col2;
+        findPosition(a, &row1, &col1);
+        findPosition(b, &row2, &col2);
+
+        if (row1 == row2) {
+            ciphertext[idx++] = matrix[row1][(col1 + 1) % SIZE];
+            ciphertext[idx++] = matrix[row2][(col2 + 1) % SIZE];
+        } else if (col1 == col2) {
+            ciphertext[idx++] = matrix[(row1 + 1) % SIZE][col1];
+            ciphertext[idx++] = matrix[(row2 + 1) % SIZE][col2];
+        } else {
+            ciphertext[idx++] = matrix[row1][col2];
+            ciphertext[idx++] = matrix[row2][col1];
+        }
+        i += 2;
+    }
+    ciphertext[idx] = '\0';
+}
+
+int main() {
+    char key[100], plaintext[100], cleanText[100], ciphertext[100];
+
+    printf("Enter the keyword: ");
+    scanf("%s", key);
+
+    printf("Enter the plaintext: ");
+    scanf("%s", plaintext);
+
+    prepareKeyMatrix(key);
+    displayMatrix();
+
+    preparePlainText(plaintext, cleanText);
+
+    encrypt(cleanText, ciphertext);
+
+    printf("\nEncrypted Cipher Text: %s\n", ciphertext);
+
+    return 0;
+}
+```
+## Output:
+<img width="686" height="450" alt="image" src="https://github.com/user-attachments/assets/e2b3cbb3-84cc-417e-8ef1-0b800228b4ca" />
+
+## Result:
+Thus, the given C program to implement the Playfair Cipher encryption technique was successfully executed.
